@@ -28,34 +28,17 @@ pub fn zsh_file_append(pluginname: &str) -> Result<()> {
         .open(&config_file)
         .expect("cannot open file");
 
-    match LAZY_PLUGIN_MAP.get(){
-        Some(val) => {
-            match val.lock().expect("LAZY_PLUGIN Error").get(&tmp) {
-                Some(_) => {
-                    file.write(
-                        format!(
-                            "zsh-defer source {}\n",source_str
-                        )
-                        .as_bytes(),
-                    )?;
-                }
-                None => {
-                    file.write(
-                        format!(
-                            "source {}\n",source_str
-                        )
-                        .as_bytes(),
-                    )?;
-                }
+    match LAZY_PLUGIN_MAP.get() {
+        Some(val) => match val.lock().expect("LAZY_PLUGIN Error").get(&tmp) {
+            Some(_) => {
+                file.write(format!("zsh-defer source {}\n", source_str).as_bytes())?;
             }
-        }
+            None => {
+                file.write(format!("source {}\n", source_str).as_bytes())?;
+            }
+        },
         None => {
-            file.write(
-                format!(
-                    "source {}\n",source_str
-                )
-                .as_bytes(),
-            )?;
+            file.write(format!("source {}\n", source_str).as_bytes())?;
         }
     }
     Ok(())
@@ -65,13 +48,22 @@ pub fn write_zsh_file() -> Result<()> {
     let mut plugins = Vec::new();
     let plugin_packages = fs::read_dir(ZestyConfig::get_data_dir())?;
     for plugin_package in plugin_packages {
-
         let path = plugin_package?.path();
-        let plugin_name = path.file_name().ok_or(anyhow::anyhow!("plugin name error"))?.to_str().ok_or(anyhow::anyhow!("plugin name error"))?.to_string().to_owned();
+        let plugin_name = path
+            .file_name()
+            .ok_or(anyhow::anyhow!("plugin name error"))?
+            .to_str()
+            .ok_or(anyhow::anyhow!("plugin name error"))?
+            .to_string()
+            .to_owned();
         let plugin_files = fs::read_dir(path)?;
 
         for plugin_file in plugin_files {
-            let path = plugin_file?.path().to_str().ok_or(anyhow::anyhow!("plugin name error"))?.to_string();
+            let path = plugin_file?
+                .path()
+                .to_str()
+                .ok_or(anyhow::anyhow!("plugin name error"))?
+                .to_string();
             if path.ends_with(&(format!("{}.plugin.zsh", plugin_name))) {
                 plugins.push(path);
             } else if path.ends_with(&(format!("{}.zsh-theme", plugin_name))) {

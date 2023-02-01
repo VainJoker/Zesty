@@ -9,7 +9,6 @@ use crate::{
     zsh::{zsh_file_append, zsh_file_exist},
 };
 
-
 #[derive(Debug, Deserialize)]
 struct Data {
     plugins: Vec<Plugin>,
@@ -24,12 +23,15 @@ struct Plugin {
 pub static LAZY_PLUGIN_MAP: OnceCell<Mutex<HashMap<String, i32>>> = OnceCell::new();
 
 // git clone https://github.com/romkatv/zsh-defer.git ~/zsh-defer
-pub fn ensure_lazy() -> Result<()>{
-
-    let path = ZestyConfig::get_data_dir().join(r#"zsh-defer"#).to_str().ok_or(anyhow::anyhow!("path error"))?.to_owned();
+pub fn ensure_lazy() -> Result<()> {
+    let path = ZestyConfig::get_data_dir()
+        .join(r#"zsh-defer"#)
+        .to_str()
+        .ok_or(anyhow::anyhow!("path error"))?
+        .to_owned();
     // let path = binding.to_str().ok_or(anyhow::anyhow!("path error"))?;
-    let append_str = format!(r#"{}/zsh-defer.plugin.zsh"#,path);
-    git_clone("https://github.com/romkatv/zsh-defer",&path)?;
+    let append_str = format!(r#"{}/zsh-defer.plugin.zsh"#, path);
+    git_clone("https://github.com/romkatv/zsh-defer", &path)?;
 
     zsh_file_exist()?;
 
@@ -51,7 +53,6 @@ pub fn install_plugins() -> Result<()> {
     });
 
     for plugin in data.plugins {
-
         // 进度条 TODO
         let pluginname = {
             let this = plugin.git.split("/").last();
@@ -64,7 +65,7 @@ pub fn install_plugins() -> Result<()> {
 
         let binding = ZestyConfig::get_data_dir().join(pluginname);
         let path = binding.to_str().ok_or(anyhow::anyhow!("path error"))?;
-        git_clone(&plugin.git,path)?;
+        git_clone(&plugin.git, path)?;
 
         if plugin.lazy != 0 {
             LAZY_PLUGIN_MAP

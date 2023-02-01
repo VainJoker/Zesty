@@ -14,8 +14,12 @@ pub static ZESTY_CONFIG: OnceCell<ZestyConfig> = OnceCell::new();
 
 impl ZestyConfig {
     pub fn new() -> Result<ZestyConfig> {
-        let config_dir = dirs::home_dir().ok_or(anyhow::anyhow!("With No Home Directory"))?.join(".config/zesty");
-        let data_dir = dirs::home_dir().ok_or(anyhow::anyhow!("With No Home Directory"))?.join(".local/share/zesty/plugins");
+        let config_dir = dirs::home_dir()
+            .ok_or(anyhow::anyhow!("With No Home Directory"))?
+            .join(".config/zesty");
+        let data_dir = dirs::home_dir()
+            .ok_or(anyhow::anyhow!("With No Home Directory"))?
+            .join(".local/share/zesty/plugins");
         // let config_dir = std::env::current_dir()?;
         // let data_dir = std::env::current_dir()?.join("plugins");
 
@@ -62,6 +66,8 @@ impl ZestyConfig {
 }
 pub fn zesty_init() -> Result<()> {
     let zest = ZestyConfig::new()?;
-    ZESTY_CONFIG.set(zest).expect("Failed to Initialize ZestyConfig");
+    ZESTY_CONFIG
+        .set(zest)
+        .expect("Failed to Initialize ZestyConfig");
     Ok(())
 }
